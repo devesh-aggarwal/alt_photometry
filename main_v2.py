@@ -12,8 +12,8 @@ mag_values_avg = []
 flux_values_all = []
 mag_values_all = []
 
-# sort directory in alphabetical order
-folders = sorted(os.listdir(base_directory))
+# sort directory in numerical order, high to low
+folders = sorted(os.listdir(base_directory), key=lambda x: int(''.join(filter(str.isdigit, x))), reverse=True)
 
 for folder in folders:
     # open file

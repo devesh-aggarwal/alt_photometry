@@ -12,7 +12,7 @@ flux_values = []
 mag_values = []
 
 # sort directory in alphabetical order
-file_list = os.listdir(directory)
+file_list = sorted(os.listdir(directory))
 
 for filename in file_list:
     # open file
@@ -29,7 +29,7 @@ for filename in file_list:
     print(np.array((mean, median, std)))
 
     # find stars
-    daofind = DAOStarFinder(fwhm=13.0, threshold=100.*std, brightest=1) # keeps only the brightest star
+    daofind = DAOStarFinder(fwhm=12.0, threshold=5.*std, brightest=1) # keeps only the brightest star
     sources = daofind(data-median)
     #print(sources)
     print(f'filename {filename} with flux {sources['flux'][0]}')
