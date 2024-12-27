@@ -1,34 +1,37 @@
 import matplotlib.pyplot as plt 
 import numpy as np
+import os
 from astropy.stats import sigma_clipped_stats
 from astropy.io import fits
-import os
-from astropy.visualization import SqrtStretch, simple_norm
-from astropy.visualization.mpl_normalize import ImageNormalize
-from photutils.aperture import CircularAperture
 from photutils.detection import DAOStarFinder
+from astropy.stats import sigma_clipped_stats
+
 
 directory = 'images/night2'
 flux_values = []
 mag_values = []
 
 # sort directory in alphabetical order
-file_list = sorted(os.listdir(directory))
+file_list = os.listdir(directory)
 
 for filename in file_list:
     # open file
     filepath = os.path.join(directory, filename)
-    hdul = fits.open(filepath)
-    data = hdul[0].data
-
-    # compute stats
+    try:
+        with fits.open(filepath) as hdul:
+            data = hdul[0].data
+    except OSError: # occurs when system files such as .DS_Store are encountered
+        print(f"ERROR: {filename}")
+        continue
+    
+    # compute stats to remove background (median)
     mean, median, std = sigma_clipped_stats(data, sigma=3.0)
-    #print(np.array((mean, median, std)))
+    print(np.array((mean, median, std)))
 
     # find stars
-    daofind = DAOStarFinder(fwhm=5.0, threshold=5.*std, brightest=1) # keeps only the brightest star
-    sources = daofind(data - median)
-    #sources.sort('flux', reverse=True)
+    daofind = DAOStarFinder(fwhm=13.0, threshold=100.*std, brightest=1) # keeps only the brightest star
+    sources = daofind(data-median)
+    #print(sources)
     print(f'filename {filename} with flux {sources['flux'][0]}')
     flux_values.append(sources['flux'][0])
     mag_values.append(sources['mag'][0]) # calculated as -2.5 * log10(flux)
@@ -38,12 +41,14 @@ for filename in file_list:
 # hdul = fits.open(filepath)
 # data = hdul[0].data
 
-# # compute stats
+
+# # compute stats to remove background (median)
 # mean, median, std = sigma_clipped_stats(data, sigma=3.0)
+# print(median)
 # #print(np.array((mean, median, std)))
 
 # # # find stars
-# daofind = DAOStarFinder(fwhm=20.0, threshold=300.*std)
+# daofind = DAOStarFinder(fwhm=5.0, threshold=5.*std, brightest=1) # keeps only the brightest star
 # sources = daofind(data - median)
 # print(sources['flux'][0])
 # flux_values.append(sources['flux'][0])
