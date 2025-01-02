@@ -50,9 +50,10 @@ ax1.set_title('Raw Image (Stretched)')
 
 # plot the zoomed-in data with apertures
 ax2.imshow(data, cmap='Greys', origin='lower', norm=norm, interpolation='nearest')
-ap_patches = apertures.plot(color='white', lw=2, label='Photometry aperture', ax=ax2)
+ap_patches = apertures.plot(color='white', lw=2, label='Analysis aperture', ax=ax2)
 ann_patches = annulus_apertures.plot(color='red', lw=2, label='Background annulus', ax=ax2)
 handles = (ap_patches[0], ann_patches[0])
 ax2.legend(loc='center', bbox_to_anchor=(0.5, 0.1), facecolor='#458989', labelcolor='white', handles=handles, prop={'weight': 'bold'})
 ax2.set_title('Magnified Image of Polaris with Apertures')
+plt.subplots_adjust(wspace=0.04)
 plt.show()

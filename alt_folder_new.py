@@ -61,9 +61,9 @@ for folder in folders:
         else:
             print(f"No sources found in {filename}")
     
-    # calculate average flux and magnitude values for each folder
+    # calculate mean flux and magnitude values for each folder
     flux_values_avg.append(np.mean(flux_values))
-    print(f'AVERAGE FLUX VALUE FOR FOLDER {folder}: {np.mean(flux_values)}')
+    print(f'MEAN FLUX VALUE FOR FOLDER {folder}: {np.mean(flux_values)}')
     flux_values_all.extend(flux_values)
 
     # get altitude from folder name
@@ -91,6 +91,7 @@ plt.xlabel('Image Index')
 plt.ylabel('Flux Value')
 plt.title('Flux Values by Individual Image')
 plt.legend()
+plt.text(-0.05, 1.05, '(A)', transform=plt.gca().transAxes, fontsize=14, fontweight='bold')
 
 # plot for delta_magnitude_all
 plt.subplot(2, 2, 2)
@@ -99,22 +100,25 @@ plt.xlabel('Image Index')
 plt.ylabel('Change in Magnitude')
 plt.title('Change in Magnitude by Individual Image')
 plt.legend()
+plt.text(-0.05, 1.05, '(B)', transform=plt.gca().transAxes, fontsize=14, fontweight='bold')
 
 # plot for flux_values_avg with altitudes as x-axis
 plt.subplot(2, 2, 3)
-plt.plot(altitudes, flux_values_avg, label='Average Flux Value by Altitude', color='orange')
+plt.plot(altitudes, flux_values_avg, label='Mean Flux Value by Altitude', color='orange')
 plt.xlabel('Altitude (ft)')
 plt.ylabel('Flux Value')
-plt.title('Average Flux Value by Altitude')
+plt.title('Mean Flux Value by Altitude')
 plt.legend()
+plt.text(-0.05, 1.05, '(C)', transform=plt.gca().transAxes, fontsize=14, fontweight='bold')
 
 # plot for delta_magnitude_avg with altitudes as x-axis
 plt.subplot(2, 2, 4)
-plt.plot(altitudes, delta_magnitude_avg, label='Average Change in Magnitude by Altitude', color='orange')
+plt.plot(altitudes, delta_magnitude_avg, label='Mean Change in Magnitude by Altitude', color='orange')
 plt.xlabel('Altitude (ft)')
-plt.ylabel('Average Change in Magnitude')
-plt.title('Average Change in Magnitude by Altitude')
+plt.ylabel('Mean Change in Magnitude')
+plt.title('Mean Change in Magnitude by Altitude')
 plt.legend()
+plt.text(-0.05, 1.05, '(D)', transform=plt.gca().transAxes, fontsize=14, fontweight='bold')
 
 plt.tight_layout()
 plt.show()
