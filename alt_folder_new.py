@@ -13,7 +13,14 @@ from photutils.aperture import CircularAperture, aperture_photometry, CircularAn
 base_directory = 'images/night2_alt_separated'
 flux_values_avg = []
 flux_values_all = []
+magnitudes_all = []
+magnitudes_avg = []
+magnitudes_var = []
 altitudes = []
+
+# calculate magnitude from flux
+def calculate_magnitude(flux_values):
+    return -2.5 * np.log10(flux_values)
 
 # sort directory in numerical order, high to low
 folders = sorted(os.listdir(base_directory), key=lambda x: int(''.join(filter(str.isdigit, x))))
@@ -24,6 +31,7 @@ for folder in folders:
     file_list = sorted(os.listdir(folder_path))
 
     flux_values = []
+    magnitudes = []
     for filename in file_list: 
         filepath = os.path.join(folder_path, filename)
         try:
@@ -58,21 +66,29 @@ for folder in folders:
             
             print(f'filename {filename} with true flux {phot_table['aperture_sum_bkgsub'][0]} (total flux {phot_table['aperture_sum'][0]} and background {phot_table['bkg_sum'][0]}). {len(sources)} source(s) found.')
             flux_values.append(phot_table['aperture_sum_bkgsub'][0])
+            magnitudes.append(calculate_magnitude(phot_table['aperture_sum_bkgsub'][0]))
         else:
             print(f"No sources found in {filename}")
     
     # calculate mean flux and magnitude values for each folder
     flux_values_avg.append(np.mean(flux_values))
+    magnitudes_avg.append(np.mean(magnitudes))
     print(f'MEAN FLUX VALUE FOR FOLDER {folder}: {np.mean(flux_values)}')
+    print(f'MEAN MAGNITUDE VALUE FOR FOLDER {folder}: {np.mean(magnitudes)}')
+    print(f'VARIANCE OF MAGNITUDE VALUES FOR FOLDER {folder}: {np.var(magnitudes, ddof=1)}')
+    
     flux_values_all.extend(flux_values)
+    magnitudes_all.extend(magnitudes)
+
+    # compute variance of magnitude values
+    magnitudes_var.append(np.var(magnitudes, ddof=1))
 
     # get altitude from folder name
     altitudes.append(int(folder))
 
 
-# calculate magnitude from flux
-def calculate_magnitude(flux_values):
-    return -2.5 * np.log10(flux_values)
+# Convert to meters
+altitudes = np.array(altitudes) * 0.3048
 
 magnitude_all = calculate_magnitude(np.array(flux_values_all))
 magnitude_avg = calculate_magnitude(np.array(flux_values_avg))
@@ -80,6 +96,9 @@ magnitude_avg = calculate_magnitude(np.array(flux_values_avg))
 # calculate change in magnitude since no calibration point exists
 delta_magnitude_all = magnitude_all - magnitude_all[0]
 delta_magnitude_avg = magnitude_avg - magnitude_avg[0]
+delta_magnitude_var = magnitudes_var + magnitudes_var[0] # sum variance when subtracting two values
+print(f'Observed relative change in magnitude by increasing altitude: {delta_magnitude_avg}')
+print(f'Variance of the change in magnitude values: {delta_magnitude_var}')
 
 # visualize the flux and magnitude values for each file and folder
 plt.figure(figsize=(15, 10))
@@ -105,7 +124,7 @@ plt.text(-0.05, 1.05, '(B)', transform=plt.gca().transAxes, fontsize=14, fontwei
 # plot for flux_values_avg with altitudes as x-axis
 plt.subplot(2, 2, 3)
 plt.plot(altitudes, flux_values_avg, label='Mean Flux Value by Altitude', color='orange')
-plt.xlabel('Altitude (ft)')
+plt.xlabel('Altitude (m)')
 plt.ylabel('Flux Value')
 plt.title('Mean Flux Value by Altitude')
 plt.legend()
@@ -114,7 +133,7 @@ plt.text(-0.05, 1.05, '(C)', transform=plt.gca().transAxes, fontsize=14, fontwei
 # plot for delta_magnitude_avg with altitudes as x-axis
 plt.subplot(2, 2, 4)
 plt.plot(altitudes, delta_magnitude_avg, label='Mean Change in Magnitude by Altitude', color='orange')
-plt.xlabel('Altitude (ft)')
+plt.xlabel('Altitude (m)')
 plt.ylabel('Mean Change in Magnitude')
 plt.title('Mean Change in Magnitude by Altitude')
 plt.legend()
